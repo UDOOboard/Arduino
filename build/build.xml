@@ -59,7 +59,7 @@
     <antcall target="${platform}-dist" />
   </target>
 
-  <!-- "§$§$&, ant doesn't have a built-in help target :(  -->
+  <!-- "ant doesn't have a built-in help target :(  -->
   <target name="help" description="Show project help">
     <java classname="org.apache.tools.ant.Main">
       <arg value="-p" />
@@ -212,12 +212,6 @@
     <chmod perm="755" file="linux/work/arduino" />
 
     <mkdir dir="linux/work/hardware/tools" />
-<!--    
-    <copy file="linux/dist/tools/adk2install" todir="linux/work/hardware/tools" />
-    <copy file="linux/dist/tools/adk2tool" todir="linux/work/hardware/tools" />
-    <chmod perm="755" file="linux/work/hardware/tools/adk2tool" />
-    <chmod perm="755" file="linux/work/hardware/tools/adk2install" />
--->
 
     <copy file="linux/dist/tools/bossac${arch-bits}" tofile="linux/work/hardware/tools/bossac" />
     <chmod perm="755" file="linux/work/hardware/tools/bossac" />
@@ -229,16 +223,16 @@
   <target name="linux32-build" depends="linux-build" description="Build linux (32-bit) version">
     <!-- Unzip ARM tools -->
     <antcall target="unzip-arm-toolchain">
-      <param name="dist_file" value="gcc-arm-none-eabi_4.6-2013q4.tar.gz" />
+      <param name="dist_file" value="gcc-arm-none-eabi_4.6-2014q4.tar.gz" />
+      <param name="dist_url" value="http://udoo.org/download/files/crosscompiler/gcc-arm-none-eabi_4.6-2014q4.tar.gz" />
       <param name="dist_check_file" value="gcc-arm-none-eabi" />
     </antcall>
-
-    <!-- Unzip ARM tools -->
-    <antcall target="unzip-arm-toolchain">
-      <param name="dist_file" value="gcc-arm-none-eabi_4.6-2013q4.tar.gz" />
-      <param name="dist_check_file" value="gcc-arm-none-eabi" />
-    </antcall>
-
+  </target>
+  
+  <target name="linux32-run" depends="linux32-build" description="Run Linux (32-bit) version">
+	<exec executable="./linux/work/arduino" spawn="false"></exec>
+  </target>
+  
   <!-- Set 'arm_disfile_available' property if ARM toolchain dist_file is downloaded             -->
   <!-- Set 'arm_toolchain_installed' property if ARM toolchain is installed in working directory -->
   <target name="check-arm-toolchain">
@@ -247,14 +241,15 @@
   </target>
 
   <!-- Retrieve ARM toolchain -->
-  <!-- TODO local file available only
 
-<target name="get-arm-toolchain" depends="check-arm-toolchain" unless="arm_distfile_available">
-    <get src="${dist_url}" dest="${staging_folder}/dist/${dist_file}" verbose="true" />
+
+  <target name="get-arm-toolchain" depends="check-arm-toolchain" unless="arm_distfile_available">
+    <get src="${dist_url}" dest="${staging_folder}/dist/${dist_file}" verbose="true" ignoreerrors="true" />
   </target>
 
-  <target name="unzip-arm-toolchain" depends="get-arm-toolchain, check-arm-toolchain"
-      unless="arm_toolchain_installed">
+  
+  <target name="unzip-arm-toolchain" depends="get-arm-toolchain, check-arm-toolchain" unless="arm_toolchain_installed">
+	  
     <checksum file="${staging_folder}/dist/${dist_file}" algorithm="sha"
       fileext=".sha" verifyproperty="checksum.matches"/>
     <condition property="checksum.matches.fail">
@@ -265,7 +260,7 @@
       File ${dist_file} failed checksum.
       Please remove "${staging_folder}/dist/${dist_file}" to download it again.
     </fail>
--->
+
     <!-- Unzip toolchain to the destination folder -->
     <exec executable="tar">
       <arg value="xfz"/>
@@ -274,18 +269,17 @@
     </exec>
   </target>
 
-  <target name="linux-dist" depends="build"
-	  description="Build .tar.gz of linux version">
+  <target name="linux-dist" depends="build" description="Build .tar.gz of linux version">
 
-    <!--get src="http://dev.processing.org/build/jre-tools-6u18-linux-i586.tgz" 
+   <!--
+    <get src="http://dev.processing.org/build/jre-tools-6u18-linux-i586.tgz" 
 	 dest="linux/jre.tgz" 
 	 usetimestamp="true" />    
     <untar compression="gzip" 
 	   dest="linux/work" 
 	   src="linux/jre.tgz" 
-	   overwrite="false"/-->
+	   overwrite="false"/>
 
-<!--
     <tar compression="gzip" basedir="linux/work"
 	 destfile="linux/arduino-${version}.tgz" />
 
@@ -300,7 +294,7 @@
       <tarfileset file="linux/work/hardware/tools/avrdude" filemode="755"
 		  prefix="arduino-${version}/hardware/tools" />
     </tar>
--->
+    -->
     <move file="linux/work" tofile="linux/arduino-${version}" />
 
     <exec executable="tar" dir="linux">
@@ -323,9 +317,6 @@
   </target>
 
   <target name="linux32-dist" depends="linux-dist"
-	  description="Build .tar.gz of linux version" />
-
-  <target name="linux64-dist" depends="linux-dist"
 	  description="Build .tar.gz of linux version" />
 
   <!-- - - - - - - - -->
@@ -358,7 +349,7 @@
     </echo>
   </target>
 
-
+  
   <!-- - - - - - - - -->
   <!-- Run It!       -->
   <!-- - - - - - - - -->
